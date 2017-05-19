@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "988169944923",
+    "firebase_url": "https://wozek-sklepowy.firebaseio.com",
+    "project_id": "wozek-sklepowy",
+    "storage_bucket": "wozek-sklepowy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988169944923:android:baebf3e606cc6a3f",
+        "android_client_info": {
+          "package_name": "com.pawel.wozeksklepowy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "988169944923-9ohdej4i57n3ag1fsi162fehnddfsqnh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pawel.wozeksklepowy",
+            "certificate_hash": "c72dca44c6e0e0c533bde762029844cab3c25252"
+          }
+        },
+        {
+          "client_id": "988169944923-mjp5oqt4ao3kt39nf7rc7frv3m0d1nep.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBd9wgQAaBEXvcPO3C3pxfAQaOKYT7l2B8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "988169944923-mjp5oqt4ao3kt39nf7rc7frv3m0d1nep.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

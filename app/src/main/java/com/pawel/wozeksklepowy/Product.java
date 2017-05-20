@@ -6,22 +6,28 @@ package com.pawel.wozeksklepowy;
 
 public class Product {
 
-    String productName;
-    String price;
+    private String productName;
+    private String price;
+    private String barcode;
 
     Product(){
     }
 
-    Product(String productName, String price){
+    Product(String productName, String price, String barcode){
         this.productName = productName;
         this.price = price;
+        this.barcode = barcode;
     }
 
-    public String getProductName() {
+    String getProductName() {
         return productName;
     }
 
-    public String getPrice() {
+    String getPrice() {
         return price;
+    }
+
+    String getBarcode() {
+        return barcode;
     }
 }

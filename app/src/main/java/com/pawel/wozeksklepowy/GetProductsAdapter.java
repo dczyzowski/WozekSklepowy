@@ -25,19 +25,21 @@ public class GetProductsAdapter extends ArrayAdapter<Product> {
     wszystkich produktów
     */
 
-    public GetProductsAdapter(Activity context, List<Product> mProducts){
+    GetProductsAdapter(Activity context, List<Product> mProducts){
         super(context, R.layout.tabele_row, mProducts);
 
         this.context = context;
         this.mProducts = mProducts;
     }
 
-    static class ViewHolder {
-        protected TextView productName;
-        protected TextView productPrice;
+    //deklaruje z klasy abstrakcyjnej klase statyczna
+    private static class ViewHolder {
+        private TextView productName;
+        private TextView productPrice;
     }
 
 
+    //generuje mi kazdy wiersz w listView
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {

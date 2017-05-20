@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Wozek Sklepowy</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_products">ProductsActivity</string>
+    <string name="action_add_product">Dodaj produkt</string>
+    <string name="title_activity_products">Wybierz produkt</string>
 </resources>

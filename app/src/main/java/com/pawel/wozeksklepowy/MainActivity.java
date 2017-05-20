@@ -3,47 +3,35 @@ package com.pawel.wozeksklepowy;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.vision.Frame;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
 public class MainActivity extends AppCompatActivity {
 
-    Uri outputFileUri;
-    BarcodeDetector detector;
 
+    private ListView listView;
+    private FloatingActionButton add;
+    private int REQUEST_READ_EXTERNAL_STORAGE = 1;
 
-    ListView listView;
-    FloatingActionButton add;
-    int REQUEST_READ_EXTERNAL_STORAGE = 1;
-
-    ArrayList<Product> listOfMyProducts;
-
+    private static ArrayList<Product> listOfMyProducts;
+    private static TextView priceText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,60 +42,49 @@ public class MainActivity extends AppCompatActivity {
 
         listView = (ListView) findViewById(R.id.myList);
         add = (FloatingActionButton) findViewById(R.id.fab);
+        listView = (ListView) findViewById(R.id.myList);
+        listOfMyProducts = new ArrayList<>();
+        priceText = (TextView) findViewById(R.id.price);
 
-        detector = new BarcodeDetector.Builder(getApplicationContext())
-                .build();
+        listView.setAdapter(new GetProductsAdapter(this, listOfMyProducts));
 
-        if(!detector.isOperational()){
-            Toast.makeText(this, "Could not set up detector", Toast.LENGTH_LONG).show();
-            return;
-        }
+        // sprawdzam urawnienia
+        checkExternalStoragePermissions();
 
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                File file = new File(Environment.getExternalStoragePublicDirectory
-                        (Environment.DIRECTORY_DOWNLOADS), "temp_pic.jpg");
-                outputFileUri = Uri.fromFile(file);
-
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+                Intent intent = new Intent(getBaseContext(), ProductsActivity.class);
                 startActivityForResult(intent, 1);
             }
         });
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-
-        ListView listView = (ListView) findViewById(R.id.myList);
-
-        listOfMyProducts = new ArrayList<>();
-        listView.setAdapter(new GetProductsAdapter(this, listOfMyProducts));
-
-        // use the SimpleCursorAdapter to show the
-        // elements in a ListView
-
-        checkExternalStoragePermissions();
-
-
+                //usuwam element z listy moich zakupów
+                listOfMyProducts.remove(position);
+                listView.setAdapter(new GetProductsAdapter(MainActivity.this, listOfMyProducts));
+                setActualPrice();
+            }
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, ProductsActivity.class);
+        // wykrywam ktory przycisk z menu kontekstowego wybralem(te 3 kropki u gory w rogu)
+        if (id == R.id.action_add_product) {
+            Intent intent = new Intent(this, AddProductActivity.class);
             startActivity(intent);
             return true;
         }
@@ -115,6 +92,17 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //odswierzam liste produktow po powruceniu do tego Activity, (mozna usunac..)
+        listView.setAdapter(new GetProductsAdapter(this, listOfMyProducts));
+
+    }
+
+    //musze sprawdzic uprawnienia w glownym watku w systemie android >= 6.0
     private boolean checkExternalStoragePermissions() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
@@ -128,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Callback received when a permissions request has been completed.
+     * odpowedź gdy uprawnienia zostaną zarządane
      */
 
     @Override
@@ -154,39 +142,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    // dodaje do @listOfMyProducts wybrany wczesniej produkt
+    public static void addListOfMyProducts(Product product){
+        listOfMyProducts.add(product);
+        setActualPrice();
+    }
 
-        Bitmap bitmap = null;
+    //aktualizuje informacje o cenie wszystkich produktow w koszyku
+    static void setActualPrice(){
+        double price = 0;
+        for(Product product : listOfMyProducts)
+        price += Double.valueOf(product.getPrice());
 
+        String myPrice = String.format("Koszt: %.2f zł", price);
 
-        File file = new File(Environment.getExternalStoragePublicDirectory
-                (Environment.DIRECTORY_DOWNLOADS), "temp_pic.jpg");
-
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), outputFileUri);
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 50, new FileOutputStream(file));
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(listOfMyProducts.size() > 0){
+            priceText.setText(myPrice);
         }
-
-            Frame frame = new Frame.Builder()
-                    .setBitmap(bitmap)
-                    .build();
-
-
-
-        SparseArray<Barcode> barcodes = detector.detect(frame);
-
-        if (barcodes.size()>0) {
-            Barcode thisCode = barcodes.valueAt(0);
-            Toast.makeText(this, "code: " + thisCode.displayValue, Toast.LENGTH_LONG).show();
-        }
-        else{
-            Toast.makeText(this, "no barcode found", Toast.LENGTH_LONG).show();
-        }
+        else priceText.setText("Koszyk jest pusty!");
     }
 }
 
